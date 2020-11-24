@@ -1,3 +1,5 @@
+import os
+import socket
 import codecs
 import collections
 from datetime import datetime
@@ -6,6 +8,7 @@ import json
 import logging
 import pprint
 import textwrap
+import argparse
 
 from flask import Flask
 from flask import request
@@ -209,4 +212,25 @@ def save_to_python():
 
 if __name__ == '__main__':
     print('Running Flask App')
-    app.run()
+#    parser = argparse.ArgumentParser()
+#    parser.add_argument("--port", help="The port number of the Flask Server.")
+#    args = parser.parse_args()
+#    port = args.get('FLASK_RUN_PORT', 5002)
+#    print('PORT IS : ', port)
+
+#    try:
+#        print('TRYING SOCKET BIND')
+#        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#        serversocket.bind(('localhost', port))
+#        serversocket.listen(5)
+#        serversocket.shutdown(socket.SHUT_RDWR)
+#        serversocket.close()
+#        break
+#    except OSError as err:
+#        port = port + 1
+#        print("OSError: ", err)
+
+    
+    print('PORT 5002')
+    app.run(port=5002)
+

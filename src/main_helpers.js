@@ -32,7 +32,8 @@ export function findInvestBinaries(isDevMode) {
     } else if (isDevMode) {
       // If no dotenv vars are set, default to where this project's
       // build process places the binaries.
-      serverExe = `${process.env.SERVER || 'build/invest/server'}${ext}`;
+      //serverExe = `${process.env.SERVER || 'build/invest/server'}${ext}`;
+      serverExe = `${process.env.SERVER || 'build/invest/server'}`;
       investExe = `${process.env.INVEST || 'build/invest/invest'}${ext}`;
 
     // C) point to binaries included in this app's installation.
@@ -62,11 +63,16 @@ export function findInvestBinaries(isDevMode) {
  */
 export function createPythonFlaskProcess(serverExe, isDevMode) {
   if (serverExe) {
+    var oldVar = process.env.MYVAR;
+    logger.debug(`oldVar is ${oldVar}`);
     let pythonServerProcess;
     if (isDevMode && process.env.PYTHON && serverExe.endsWith('.py')) {
       // A special devMode case for launching from the source code
       // to facilitate debugging & development of src/server.py
-      pythonServerProcess = spawn(process.env.PYTHON, [serverExe]);
+      //pythonServerProcess = spawn(process.env.PYTHON, [serverExe]);
+      pythonServerProcess = spawn(process.env.PYTHON, [serverExe], {
+        env: { MYVAR: process.env.MYVAR },
+      });
     } else {
       // The most reliable, cross-platform way to make sure spawn
       // can find the exe is to pass only the command name while
@@ -80,6 +86,14 @@ export function createPythonFlaskProcess(serverExe, isDevMode) {
     logger.debug(serverExe);
     pythonServerProcess.stdout.on('data', (data) => {
       logger.debug(`${data}`);
+      let strData = `${data}`;
+      let isPort = strData.includes('PORT');
+      if (isPort) {
+        let idx = strData.indexOf('PORT');
+        let flaskPort = strData.slice(idx+5, idx+9); 
+        logger.debug(`4 Flask Port ##${flaskPort}##`);
+        process.env['PORT'] = flaskPort;
+      }
     });
     pythonServerProcess.stderr.on('data', (data) => {
       logger.debug(`${data}`);
