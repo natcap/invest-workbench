@@ -6,9 +6,9 @@ import itertools
 import glob
 from PyInstaller.compat import is_win, is_darwin, is_linux
 
-#if not is_win:
-# Windows builds on Actions don't use conda
-conda_env = os.environ['CONDA_PREFIX']
+if not is_win:
+    # Windows builds on Actions don't use conda
+    conda_env = os.environ['CONDA_PREFIX']
 workbench_dir = os.getcwd()
 invest_dir = os.path.join(workbench_dir, 'invest')
 block_cipher = None
@@ -63,11 +63,11 @@ else:
         ('msvcp90.dll', 'C:\\Windows\\System32\\msvcp90.dll', 'BINARY'),
         ('msvcr90.dll', 'C:\\Windows\\System32\\msvcr90.dll', 'BINARY')
     ]
-    
+
     # add rtree dependency dynamic libraries from conda environment
-    invest_a.binaries += [
-        (os.path.basename(name), name, 'BINARY') for name in
-        glob.glob(os.path.join(conda_env, 'Library/bin/spatialindex*.dll'))]
+#    invest_a.binaries += [
+#        (os.path.basename(name), name, 'BINARY') for name in
+#        glob.glob(os.path.join(conda_env, 'Library/bin/spatialindex*.dll'))]
 
     # .exe extension is required if we're on windows.
     invest_exename += '.exe'
