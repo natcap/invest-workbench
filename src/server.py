@@ -216,7 +216,7 @@ if __name__ == '__main__':
     # try other ports if the current one is already in use
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--port", help="The port number of the Flask Server.")
+        "--port", default=5000, help="The port number of the Flask Server.")
     parser.add_argument(
         "--flex", default=True, help="The port number of the Flask Server.")
     args = vars(parser.parse_args())

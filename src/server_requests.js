@@ -23,7 +23,6 @@ export function getFlaskIsReady({ i = 0, retries = 21 } = {}) {
       .catch(async (error) => {
         if (error.code === 'ECONNREFUSED') {
           while (i < retries) {
-            logger.debug(`PORT is ${PORT}`);
             i++;
             // Try every X ms, usually takes a couple seconds to startup.
             await new Promise((resolve) => setTimeout(resolve, 300));

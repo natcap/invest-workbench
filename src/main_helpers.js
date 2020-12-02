@@ -32,8 +32,8 @@ export function findInvestBinaries(isDevMode) {
     } else if (isDevMode) {
       // If no dotenv vars are set, default to where this project's
       // build process places the binaries.
-      //serverExe = `${process.env.SERVER || 'build/invest/server'}${ext}`;
-      serverExe = `${process.env.SERVER || 'build/invest/server'}`;
+      serverExe = `${process.env.SERVER || 'build/invest/server'}${ext}`;
+      //serverExe = `${process.env.SERVER || 'build/invest/server'}`;
       investExe = `${process.env.INVEST || 'build/invest/invest'}${ext}`;
 
     // C) point to binaries included in this app's installation.
