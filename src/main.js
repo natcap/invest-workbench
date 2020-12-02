@@ -34,7 +34,8 @@ const createWindow = async () => {
     event.reply('variable-reply', mainProcessVars);
   });
 
-  createPythonFlaskProcess(binaries.server, isDevMode);
+  // Wait for a response from the server confirming the host information
+  await createPythonFlaskProcess(binaries.server, isDevMode);
   // Wait for a response from the server before loading the app
   await getFlaskIsReady();
 

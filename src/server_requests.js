@@ -2,18 +2,8 @@ import fetch from 'node-fetch';
 import { getLogger } from './logger';
 
 const logger = getLogger(__filename.split('/').slice(-1)[0]);
-//const PORT = process.env.PORT || '5000';
 const HOSTNAME = 'http://localhost';
 
-/** Return the port number to expect.
- *
- * The Flask app could update the default port number which will update 
- * process.env.PORT
- *
- */
-function getFlaskPort() {
-  return process.env.PORT || '5000';
-}
 
 /** Find out if the Flask server is online, waiting until it is.
  *
@@ -26,15 +16,14 @@ function getFlaskPort() {
  */
 export function getFlaskIsReady({ i = 0, retries = 21 } = {}) {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/ready`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/ready`, {
       method: 'get',
     })
-      .then((response) => response.text())
+      .then(response => response.text())
       .catch(async (error) => {
         if (error.code === 'ECONNREFUSED') {
           while (i < retries) {
-            //var testVar = process.env.MYVAR;
-            //logger.debug(`MYVAR is ${testVar}`);
+            logger.debug(`PORT is ${PORT}`);
             i++;
             // Try every X ms, usually takes a couple seconds to startup.
             await new Promise((resolve) => setTimeout(resolve, 300));
@@ -59,7 +48,7 @@ export function getFlaskIsReady({ i = 0, retries = 21 } = {}) {
  */
 export function getInvestList() {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/models`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/models`, {
       method: 'get',
     })
       .then((response) => response.json())
@@ -75,7 +64,7 @@ export function getInvestList() {
  */
 export function getSpec(payload) {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/getspec`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/getspec`, {
       method: 'post',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
@@ -96,7 +85,7 @@ export function getSpec(payload) {
  */
 export function fetchValidation(payload) {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/validate`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/validate`, {
       method: 'post',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
@@ -114,7 +103,7 @@ export function fetchValidation(payload) {
  */
 export function fetchDatastackFromFile(payload) {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/post_datastack_file`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/post_datastack_file`, {
       method: 'post',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
@@ -137,7 +126,7 @@ export function fetchDatastackFromFile(payload) {
  */
 export function saveToPython(payload) {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/save_to_python`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/save_to_python`, {
       method: 'post',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
@@ -161,7 +150,7 @@ export function saveToPython(payload) {
  */
 export function writeParametersToFile(payload) {
   return (
-    fetch(`${HOSTNAME}:${getFlaskPort()}/write_parameter_set_file`, {
+    fetch(`${HOSTNAME}:${process.env.PORT}/write_parameter_set_file`, {
       method: 'post',
       body: JSON.stringify(payload),
       headers: { 'Content-Type': 'application/json' },
@@ -179,7 +168,7 @@ export function writeParametersToFile(payload) {
  */
 export function shutdownPythonProcess() {
   return (
-    fetch(`http://localhost:${getFlaskPort()}/shutdown`, {
+    fetch(`http://localhost:${process.env.PORT}/shutdown`, {
       method: 'get',
     })
       .then((response) => response.text())

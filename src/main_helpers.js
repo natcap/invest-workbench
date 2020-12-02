@@ -61,55 +61,64 @@ export function findInvestBinaries(isDevMode) {
  * @param {boolean} isDevMode - a boolean designating dev mode or not.
  * @returns {undefined}
  */
-export function createPythonFlaskProcess(serverExe, isDevMode) {
-  if (serverExe) {
-    var oldVar = process.env.MYVAR;
-    logger.debug(`oldVar is ${oldVar}`);
-    let pythonServerProcess;
-    if (isDevMode && process.env.PYTHON && serverExe.endsWith('.py')) {
-      // A special devMode case for launching from the source code
-      // to facilitate debugging & development of src/server.py
-      //pythonServerProcess = spawn(process.env.PYTHON, [serverExe]);
-      pythonServerProcess = spawn(process.env.PYTHON, [serverExe], {
-        env: { MYVAR: process.env.MYVAR },
+export async function createPythonFlaskProcess(serverExe, isDevMode) {
+  var isPort = false;
+    if (serverExe) {
+      let pythonServerProcess;
+      if (isDevMode && process.env.PYTHON && serverExe.endsWith('.py')) {
+        // A special devMode case for launching from the source code
+        // to facilitate debugging & development of src/server.py
+        var port = `${process.env.PORT || '5000'}`;
+        pythonServerProcess = spawn(
+          process.env.PYTHON, [serverExe, `--port=${port}`]
+        );
+      } else {
+        // The most reliable, cross-platform way to make sure spawn
+        // can find the exe is to pass only the command name while
+        // also putting it's location on the PATH:
+        pythonServerProcess = spawn(path.basename(serverExe), {
+          env: { PATH: path.dirname(serverExe) },
+        });
+      }
+
+      logger.debug(`Started python process as PID ${pythonServerProcess.pid}`);
+      logger.debug(serverExe);
+      pythonServerProcess.stdout.on('data', (data) => {
+        logger.debug(`${data}`);
+        let strData = `${data}`;
+        isPort = strData.includes('PORT');
+        if (isPort) {
+            let idx = strData.indexOf('PORT');
+            let flaskPort = strData.slice(idx+5, idx+9);
+            logger.debug(`Flask Server started on Port ${flaskPort}`);
+            process.env['PORT'] = flaskPort;
+        }
+      });
+      pythonServerProcess.stderr.on('data', (data) => {
+        logger.debug(`${data}`);
+      });
+      pythonServerProcess.on('error', (err) => {
+        logger.error(err.stack);
+        logger.error(
+          `The flask app ${serverExe} crashed or failed to start
+           so this application must be restarted`
+        );
+        throw err;
+      });
+      pythonServerProcess.on('close', (code, signal) => {
+        logger.debug(`Flask process terminated with code ${code} and signal ${signal}`);
       });
     } else {
-      // The most reliable, cross-platform way to make sure spawn
-      // can find the exe is to pass only the command name while
-      // also putting it's location on the PATH:
-      pythonServerProcess = spawn(path.basename(serverExe), {
-        env: { PATH: path.dirname(serverExe) },
-      });
+      logger.error('no existing invest installations found');
     }
 
-    logger.debug(`Started python process as PID ${pythonServerProcess.pid}`);
-    logger.debug(serverExe);
-    pythonServerProcess.stdout.on('data', (data) => {
-      logger.debug(`${data}`);
-      let strData = `${data}`;
-      let isPort = strData.includes('PORT');
-      if (isPort) {
-        let idx = strData.indexOf('PORT');
-        let flaskPort = strData.slice(idx+5, idx+9); 
-        logger.debug(`4 Flask Port ##${flaskPort}##`);
-        process.env['PORT'] = flaskPort;
-      }
-    });
-    pythonServerProcess.stderr.on('data', (data) => {
-      logger.debug(`${data}`);
-    });
-    pythonServerProcess.on('error', (err) => {
-      logger.error(err.stack);
-      logger.error(
-        `The flask app ${serverExe} crashed or failed to start
-         so this application must be restarted`
-      );
-      throw err;
-    });
-    pythonServerProcess.on('close', (code, signal) => {
-      logger.debug(`Flask process terminated with code ${code} and signal ${signal}`);
-    });
-  } else {
-    logger.error('no existing invest installations found');
-  }
+    let i = 0;
+    let serverPortRetries = 20;
+    while (i < serverPortRetries) {
+      if (isPort) break;
+      i++;
+      // Try every X ms, usually takes a couple seconds to startup.
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.debug(`Waiting for Port confirmation: retry # ${i}`);
+    }
 }

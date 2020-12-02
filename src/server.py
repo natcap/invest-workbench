@@ -1,5 +1,5 @@
+import argparse
 import os
-import socket
 import codecs
 import collections
 from datetime import datetime
@@ -7,8 +7,8 @@ import importlib
 import json
 import logging
 import pprint
+import socket
 import textwrap
-import argparse
 
 from flask import Flask
 from flask import request
@@ -212,25 +212,38 @@ def save_to_python():
 
 if __name__ == '__main__':
     print('Running Flask App')
-#    parser = argparse.ArgumentParser()
-#    parser.add_argument("--port", help="The port number of the Flask Server.")
-#    args = parser.parse_args()
-#    port = args.get('FLASK_RUN_PORT', 5002)
-#    print('PORT IS : ', port)
+    # Process two optional arguments for the Flask App port and whether to
+    # try other ports if the current one is already in use
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--port", help="The port number of the Flask Server.")
+    parser.add_argument(
+        "--flex", default=True, help="The port number of the Flask Server.")
+    args = vars(parser.parse_args())
+    port = int(args.get('port', 5000))
+    flex = bool(args.get('flex', True))
 
-#    try:
-#        print('TRYING SOCKET BIND')
-#        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#        serversocket.bind(('localhost', port))
-#        serversocket.listen(5)
-#        serversocket.shutdown(socket.SHUT_RDWR)
-#        serversocket.close()
-#        break
-#    except OSError as err:
-#        port = port + 1
-#        print("OSError: ", err)
+    port_good = False
+    # Number of ports to increment for attempts
+    num_port_attempts = 5
+    for i in range(0, num_port_attempts):
+        LOGGER.debug(f'TRYING SOCKET BIND on port {port}')
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as ss:
+            try:
+                ss.bind(('localhost', port))
+                ss.close()
+                port_good = True
+            except OSError as err:
+                LOGGER.debug(f'OSError: {err}')
+                if not flex:
+                    raise err
 
-    
-    print('PORT 5002')
-    app.run(port=5002)
+        if port_good:
+            break
+
+        port = port + 1
+
+    # Write to stdout so that parent process can receive the used port number
+    print(f'PORT {port}')
+    app.run(port=int(port))
 
