@@ -64,11 +64,6 @@ else:
         ('msvcr90.dll', 'C:\\Windows\\System32\\msvcr90.dll', 'BINARY')
     ]
 
-    # add rtree dependency dynamic libraries from conda environment
-#    invest_a.binaries += [
-#        (os.path.basename(name), name, 'BINARY') for name in
-#        glob.glob(os.path.join(conda_env, 'Library/bin/spatialindex*.dll'))]
-
     # .exe extension is required if we're on windows.
     invest_exename += '.exe'
     server_exename += '.exe'
