@@ -62,6 +62,7 @@ export function findInvestBinaries(isDevMode) {
  */
 export async function createPythonFlaskProcess(serverExe, isDevMode) {
   let isPort = false;
+  let flaskPort;
   if (serverExe) {
     let pythonServerProcess;
     if (isDevMode && process.env.PYTHON && serverExe.endsWith('.py')) {
@@ -90,9 +91,8 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
       isPort = strData.includes('PORT');
       if (isPort) {
         const idx = strData.indexOf('PORT');
-        const flaskPort = strData.slice(idx + 5, idx + 9);
+        flaskPort = strData.slice(idx + 5, idx + 9);
         logger.debug(`Flask Server started on Port ${flaskPort}`);
-        process.env['PORT'] = flaskPort;
       }
     });
     pythonServerProcess.stderr.on('data', (data) => {
@@ -119,6 +119,7 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       logger.debug(`Waiting for Port confirmation: retry # ${i}`);
     }
+    resolve(flaskPort || 'undefined');
   } else {
     logger.error('no existing invest installations found');
   }
