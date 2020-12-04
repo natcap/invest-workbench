@@ -37,7 +37,7 @@ const createWindow = async () => {
   // Wait for a response from python server confirming the host information
   const port = await createPythonFlaskProcess(binaries.server, isDevMode);
   if (port !== 'undefined') {
-    process.env['PORT'] = int(port);
+    process.env['PORT'] = parseInt(port);
   }
   else {
     logger.error('The resolving of the server port timed out. Try again.');

@@ -119,7 +119,7 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       logger.debug(`Waiting for Port confirmation: retry # ${i}`);
     }
-    resolve(flaskPort || 'undefined');
+    return flaskPort || 'undefined';
   } else {
     logger.error('no existing invest installations found');
   }
