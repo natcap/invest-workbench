@@ -61,7 +61,7 @@ export function findInvestBinaries(isDevMode) {
  * @returns {undefined}
  */
 export async function createPythonFlaskProcess(serverExe, isDevMode) {
-  var isPort = false;
+  let isPort = false;
   if (serverExe) {
     let pythonServerProcess;
     if (isDevMode && process.env.PYTHON && serverExe.endsWith('.py')) {
@@ -85,6 +85,8 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
     pythonServerProcess.stdout.on('data', (data) => {
       logger.debug(`${data}`);
       const strData = `${data}`;
+      // Looking for feedback from the python server of which port Flask was
+      // launched on. Message will be of the form: "PORT 5000"
       isPort = strData.includes('PORT');
       if (isPort) {
         const idx = strData.indexOf('PORT');
@@ -107,17 +109,18 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
     pythonServerProcess.on('close', (code, signal) => {
       logger.debug(`Flask process terminated with code ${code} and signal ${signal}`);
     });
+
+    let i = 0;
+    const serverPortRetries = 20;
+    while (i < serverPortRetries) {
+      if (isPort) break;
+      i++;
+      // Try every X ms, usually takes a couple seconds to startup.
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      logger.debug(`Waiting for Port confirmation: retry # ${i}`);
+    }
   } else {
     logger.error('no existing invest installations found');
   }
 
-  let i = 0;
-  const serverPortRetries = 20;
-  while (i < serverPortRetries) {
-    if (isPort) break;
-    i++;
-    // Try every X ms, usually takes a couple seconds to startup.
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    logger.debug(`Waiting for Port confirmation: retry # ${i}`);
-  }
 }
