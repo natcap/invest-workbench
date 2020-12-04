@@ -13,7 +13,8 @@ jest.setTimeout(250000); // This test is slow in CI
 const isDevMode = true; // otherwise need to mock process.resourcesPath
 beforeAll(async () => {
   const binaries = await findInvestBinaries(isDevMode);
-  const port = await createPythonFlaskProcess(binaries.server, isDevMode);
+  const port = await createPythonFlaskProcess(
+    binaries.server, isDevMode, {serverPortRetries:  100});
   // In the CI the flask app takes more than 10x as long to startup.
   // Especially so on macos.
   // So, allowing many retries, especially because the error

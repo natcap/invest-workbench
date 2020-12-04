@@ -58,9 +58,13 @@ export function findInvestBinaries(isDevMode) {
  *
  * @param  {string} serverExe - path to executeable that launches flask app.
  * @param {boolean} isDevMode - a boolean designating dev mode or not.
- * @returns {undefined}
+ * @param {number} serverPortRetries - the number of retries for awaiting the
+ *  server to report which port it used.
+ * @returns {Promise} Returns port number or 'undefined' if no port was
+ *  reported.
  */
-export async function createPythonFlaskProcess(serverExe, isDevMode) {
+export async function createPythonFlaskProcess(
+  serverExe, isDevMode, { serverPortRetries = 20 } = {}) {
   let isPort = false;
   let flaskPort;
   if (serverExe) {
@@ -111,7 +115,6 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
     });
 
     let i = 0;
-    const serverPortRetries = 20;
     while (i < serverPortRetries) {
       if (isPort) break;
       i++;
@@ -119,9 +122,8 @@ export async function createPythonFlaskProcess(serverExe, isDevMode) {
       await new Promise((resolve) => setTimeout(resolve, 500));
       logger.debug(`Waiting for Port confirmation: retry # ${i}`);
     }
-    return flaskPort || 'undefined';
   } else {
     logger.error('no existing invest installations found');
   }
-
+  return flaskPort || 'undefined';
 }
