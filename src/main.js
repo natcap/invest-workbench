@@ -8,13 +8,13 @@ if (isDevMode) {
 }
 
 const {
-  app, BrowserWindow, ipcMain, screen, nativeTheme
+  app, BrowserWindow, ipcMain, screen, nativeTheme,
 } = require('electron'); // eslint-disable-line import/no-extraneous-dependencies
 const {
-  getFlaskIsReady, shutdownPythonProcess
+  getFlaskIsReady, shutdownPythonProcess,
 } = require('./server_requests');
 const {
-  findInvestBinaries, createPythonFlaskProcess
+  findInvestBinaries, createPythonFlaskProcess,
 } = require('./main_helpers');
 const { getLogger } = require('./logger');
 
@@ -34,9 +34,9 @@ const createWindow = async () => {
     event.reply('variable-reply', mainProcessVars);
   });
 
-  // Wait for a response from the server confirming the host information
+  // Wait for a response from python server confirming the host information
   await createPythonFlaskProcess(binaries.server, isDevMode);
-  // Wait for a response from the server before loading the app
+  // Wait for the python server to finish startup before loading the app
   await getFlaskIsReady();
 
   // always use light mode regardless of the OS/browser setting
@@ -66,7 +66,7 @@ const createWindow = async () => {
   mainWindow.webContents.on('did-frame-finish-load', async () => {
     if (isDevMode) {
       const {
-        default: installExtension, REACT_DEVELOPER_TOOLS
+        default: installExtension, REACT_DEVELOPER_TOOLS,
       } = require('electron-devtools-installer');
       await installExtension(REACT_DEVELOPER_TOOLS);
       mainWindow.webContents.openDevTools();

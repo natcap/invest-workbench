@@ -4,7 +4,6 @@ import { getLogger } from './logger';
 const logger = getLogger(__filename.split('/').slice(-1)[0]);
 const HOSTNAME = 'http://localhost';
 
-
 /** Find out if the Flask server is online, waiting until it is.
  *
  * Sometimes the app will make a server request before it's ready,
