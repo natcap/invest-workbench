@@ -8,6 +8,7 @@ import json
 import logging
 import pprint
 import socket
+import sys
 import textwrap
 
 from flask import Flask
@@ -220,8 +221,10 @@ if __name__ == '__main__':
     parser.add_argument(
         "--flex", default=True, help="The port number of the Flask Server.")
     args = vars(parser.parse_args())
-    port = int(args.get('port', 5000))
-    flex = bool(args.get('flex', True))
+    # Since port and flex are optional arguments with defaults, they should
+    # always be keys
+    port = int(args['port'])
+    flex = bool(args['flex'])
 
     port_good = False
     # Number of ports to increment for attempts
@@ -244,6 +247,6 @@ if __name__ == '__main__':
         port = port + 1
 
     # Write to stdout so that parent process can receive the used port number
-    print(f'PORT {port}')
-    app.run(port=int(port))
+    sys.stdout.write(f'PORT {port}')
+    app.run(port=port)
 
