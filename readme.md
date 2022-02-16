@@ -1,3 +1,5 @@
+# This repo as been migrated into https://github.com/natcap/invest
+
 This project is a user-interface layer for InVEST (Integrated Valuation of
 Ecosystem Services and Tradeoffs).
 InVEST can be found at https://github.com/natcap/invest.
